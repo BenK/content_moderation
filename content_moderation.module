@@ -390,12 +390,7 @@ function content_moderation_views_api() {
   return array('api' => 2.0);
 }
 
-/*
- * This is our small helper to ensure, that always the newes vid gets edited.
- * The normal node API would edit the vid which is currently in {node} table,
- * But we want to edit the VID which is the most recent one.
- */
-function _content_moderation_node_edit_page($node) {
+function _content_moderation_editing_allowed($node) {
   if(variable_get('content_moderation_moderate_latest_only', 1) === 1) {
     $moderated_revs = _content_moderation_has_moderated_revisions($node->nid);
 
@@ -405,9 +400,22 @@ function _content_moderation_node_edit_page($node) {
       $none_state = _content_moderation_none_state();
       drupal_set_message(t('You cannot edit the document, as the latest revision is under moderation. Set the revision back to the state "!state" to be able to edit.', array('!state' => $none_state)), 'warning');
       drupal_goto("node/{$node->nid}");
-      return false;
+      return FALSE;
     }
   }
+  return TRUE;
+}
+
+/*
+ * This is our small helper to ensure, that always the newes vid gets edited.
+ * The normal node API would edit the vid which is currently in {node} table,
+ * But we want to edit the VID which is the most recent one.
+ */
+function _content_moderation_node_edit_page($node) {
+  if(!_content_moderation_editing_allowed($node)) {
+    return FALSE;
+  }
+
   if (_content_moderation_moderate_node_type($node->type)) {
     $vid =  _content_moderation_latest_revision($node->nid);
     // Drupal uses the vid of the node table, not the real latest revision out of node_revisions
