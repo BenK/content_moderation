@@ -397,8 +397,7 @@ function _content_moderation_editing_allowed($node) {
     // Do not allow state changing of revisions, which are not the latest
     // TODO: Maybe we need a exception for the live state to unapprove it later?
     if(count($moderated_revs) > 0) {
-      $none_state = _content_moderation_none_state();
-      drupal_set_message(t('You cannot edit the document, as the latest revision is under moderation. Set the revision back to the state "!state" to be able to edit.', array('!state' => $none_state)), 'warning');
+      $none_state = _content_moderation_none_state();      
       return FALSE;
     }
   }
@@ -412,6 +411,7 @@ function _content_moderation_editing_allowed($node) {
  */
 function _content_moderation_node_edit_page($node) {
   if(!_content_moderation_editing_allowed($node)) {
+    drupal_set_message(t('You cannot edit the document, as the latest revision is under moderation. Set the revision back to the state "!state" to be able to edit.', array('!state' => $none_state)), 'warning');
     return FALSE;
   }
 
